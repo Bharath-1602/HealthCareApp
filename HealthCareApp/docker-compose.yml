@@ -15,7 +15,6 @@ services:
       - ./user-management-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - user-net
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phealthcare_root_2024"]
       interval: 15s
@@ -34,7 +33,6 @@ services:
       - ./doctor-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - doctor-net
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phealthcare_root_2024"]
       interval: 15s
@@ -53,7 +51,6 @@ services:
       - ./registration-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - registration-net
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phealthcare_root_2024"]
       interval: 15s
@@ -72,7 +69,6 @@ services:
       - ./appointment-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - appointment-net
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phealthcare_root_2024"]
       interval: 15s
@@ -91,7 +87,6 @@ services:
       - ./vital-sign-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - vital-net
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phealthcare_root_2024"]
       interval: 15s
@@ -110,7 +105,6 @@ services:
       - ./forum-service/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - forum-net
-    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-phealthcare_root_2024"]
       interval: 15s
