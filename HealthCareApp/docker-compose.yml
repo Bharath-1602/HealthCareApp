@@ -1,0 +1,333 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # MySQL Databases (one per service)
+  # ============================================
+  user-db:
+    image: mysql:8.0
+    container_name: user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: user_management_db
+    volumes:
+      - user-db-data:/var/lib/mysql
+      - ./user-management-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - user-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  doctor-db:
+    image: mysql:8.0
+    container_name: doctor-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: doctor_db
+    volumes:
+      - doctor-db-data:/var/lib/mysql
+      - ./doctor-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - doctor-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  registration-db:
+    image: mysql:8.0
+    container_name: registration-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: registration_db
+    volumes:
+      - registration-db-data:/var/lib/mysql
+      - ./registration-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - registration-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  appointment-db:
+    image: mysql:8.0
+    container_name: appointment-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: appointment_db
+    volumes:
+      - appointment-db-data:/var/lib/mysql
+      - ./appointment-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - appointment-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vital-db:
+    image: mysql:8.0
+    container_name: vital-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: vital_sign_db
+    volumes:
+      - vital-db-data:/var/lib/mysql
+      - ./vital-sign-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - vital-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  forum-db:
+    image: mysql:8.0
+    container_name: forum-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: forum_db
+    volumes:
+      - forum-db-data:/var/lib/mysql
+      - ./forum-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - forum-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  complaint-db:
+    image: mysql:8.0
+    container_name: complaint-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: complaint_db
+    volumes:
+      - complaint-db-data:/var/lib/mysql
+      - ./complaint-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - complaint-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Microservices
+  # ============================================
+  user-management-service:
+    build: ./user-management-service
+    container_name: user-management-service
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: user-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: user_management_db
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      user-db:
+        condition: service_healthy
+    networks:
+      - user-net
+      - gateway-net
+    restart: unless-stopped
+
+  doctor-service:
+    build: ./doctor-service
+    container_name: doctor-service
+    ports:
+      - "3005:3005"
+    environment:
+      PORT: 3005
+      DB_HOST: doctor-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: doctor_db
+    depends_on:
+      doctor-db:
+        condition: service_healthy
+    networks:
+      - doctor-net
+      - gateway-net
+    restart: unless-stopped
+
+  registration-service:
+    build: ./registration-service
+    container_name: registration-service
+    ports:
+      - "3004:3004"
+    environment:
+      PORT: 3004
+      DB_HOST: registration-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: registration_db
+    depends_on:
+      registration-db:
+        condition: service_healthy
+    networks:
+      - registration-net
+      - gateway-net
+    restart: unless-stopped
+
+  appointment-service:
+    build: ./appointment-service
+    container_name: appointment-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: appointment-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: appointment_db
+    depends_on:
+      appointment-db:
+        condition: service_healthy
+    networks:
+      - appointment-net
+      - gateway-net
+    restart: unless-stopped
+
+  vital-sign-service:
+    build: ./vital-sign-service
+    container_name: vital-sign-service
+    ports:
+      - "3003:3003"
+    environment:
+      PORT: 3003
+      DB_HOST: vital-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: vital_sign_db
+    depends_on:
+      vital-db:
+        condition: service_healthy
+    networks:
+      - vital-net
+      - gateway-net
+    restart: unless-stopped
+
+  forum-service:
+    build: ./forum-service
+    container_name: forum-service
+    ports:
+      - "3007:3007"
+    environment:
+      PORT: 3007
+      DB_HOST: forum-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: forum_db
+    depends_on:
+      forum-db:
+        condition: service_healthy
+    networks:
+      - forum-net
+      - gateway-net
+    restart: unless-stopped
+
+  complaint-service:
+    build: ./complaint-service
+    container_name: complaint-service
+    ports:
+      - "3008:3008"
+    environment:
+      PORT: 3008
+      DB_HOST: complaint-db
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      DB_NAME: complaint_db
+    depends_on:
+      complaint-db:
+        condition: service_healthy
+    networks:
+      - complaint-net
+      - gateway-net
+    restart: unless-stopped
+
+  admin-service:
+    build: ./admin-service
+    container_name: admin-service
+    ports:
+      - "3009:3009"
+    environment:
+      PORT: 3009
+      USER_SERVICE_URL: http://user-management-service:3002
+      DOCTOR_SERVICE_URL: http://doctor-service:3005
+      APPOINTMENT_SERVICE_URL: http://appointment-service:3001
+      REGISTRATION_SERVICE_URL: http://registration-service:3004
+      VITAL_SERVICE_URL: http://vital-sign-service:3003
+      FORUM_SERVICE_URL: http://forum-service:3007
+      COMPLAINT_SERVICE_URL: http://complaint-service:3008
+    networks:
+      - gateway-net
+    restart: unless-stopped
+
+  # ============================================
+  # Frontend + API Gateway (Nginx)
+  # ============================================
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - user-management-service
+      - doctor-service
+      - registration-service
+      - appointment-service
+      - vital-sign-service
+      - forum-service
+      - complaint-service
+      - admin-service
+    networks:
+      - gateway-net
+    restart: unless-stopped
+
+# ============================================
+# Isolated Docker Networks
+# ============================================
+networks:
+  gateway-net:
+    driver: bridge
+  user-net:
+    driver: bridge
+  doctor-net:
+    driver: bridge
+  registration-net:
+    driver: bridge
+  appointment-net:
+    driver: bridge
+  vital-net:
+    driver: bridge
+  forum-net:
+    driver: bridge
+  complaint-net:
+    driver: bridge
+
+# ============================================
+# Persistent Volumes
+# ============================================
+volumes:
+  user-db-data:
+  doctor-db-data:
+  registration-db-data:
+  appointment-db-data:
+  vital-db-data:
+  forum-db-data:
+  complaint-db-data:
